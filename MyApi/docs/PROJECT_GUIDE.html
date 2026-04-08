@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MyApi Project Guide</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 36px; color: #1f2937; line-height: 1.55; }
+h1, h2, h3 { color: #0f172a; }
+h1 { border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; }
+pre { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 14px; white-space: pre-wrap; }
+code { font-family: Menlo, Consolas, monospace; }
+ul, ol { margin-top: 0.35rem; }
+li { margin: 0.2rem 0; }
+.table-note { color: #475569; }
+</style>
+</head>
+<body>
+
+<h1>MyApi Project Guide</h1>
+<h2>1. Project Summary</h2>
+<p>MyApi is an ASP.NET Core Web API built on .NET 10 with a modular feature layout. The application starts from a single host and loads feature modules dynamically based on configuration.</p>
+<p>Current modules in this repository:</p>
+<ul>
+<li>Auth: implemented and enabled by default</li>
+<li>Payment: implemented but disabled by default</li>
+<li>KOT: scaffolded only, not implemented yet</li>
+</ul>
+<p>The project already includes:</p>
+<ul>
+<li>JWT authentication</li>
+<li>Swagger for API exploration in development</li>
+<li>Module-aware controller loading</li>
+<li>Module-aware endpoint hiding in Swagger</li>
+<li>Entity Framework Core support for Auth with SQLite or MySQL</li>
+</ul>
+<h2>2. Technology Stack</h2>
+<ul>
+<li>.NET 10 Web API</li>
+<li>ASP.NET Core Controllers</li>
+<li>Swagger via Swashbuckle</li>
+<li>JWT Bearer authentication</li>
+<li>Entity Framework Core</li>
+<li>SQLite and MySQL support for the Auth module</li>
+</ul>
+<p>Important packages are declared in MyApi.csproj:</p>
+<ul>
+<li>Microsoft.AspNetCore.Authentication.JwtBearer</li>
+<li>Microsoft.EntityFrameworkCore.Design</li>
+<li>Microsoft.EntityFrameworkCore.Sqlite</li>
+<li>Pomelo.EntityFrameworkCore.MySql</li>
+<li>Swashbuckle.AspNetCore</li>
+</ul>
+<h2>3. Solution Structure</h2>
+<p>Main folders:</p>
+<ul>
+<li>Program.cs: application bootstrap and middleware pipeline</li>
+<li>Common/Auth: current-user abstractions</li>
+<li>Common/Modules: module registration, module filtering, and module configuration helpers</li>
+<li>Controllers: non-module controllers such as WeatherForecast</li>
+<li>Modules/Auth: authentication and authorization module</li>
+<li>Modules/Payment: payment demo module</li>
+<li>Modules/KOT: generated starter module skeleton</li>
+<li>docs: project documentation</li>
+<li>scripts: helper scripts</li>
+</ul>
+<p>Module layout pattern:</p>
+<pre><code>Modules/&lt;ModuleName&gt;/
+  &lt;ModuleName&gt;ModuleExtensions.cs
+  Application/
+    DTOs/
+    Interfaces/
+  Controllers/
+  Domain/
+    Entities/
+  Persistence/
+    Migrations/
+  Services/</code></pre>
+<h2>4. How the Module System Works</h2>
+<p>The module system is implemented in Common/Modules.</p>
+<p>Behavior:</p>
+<ul>
+<li>All concrete classes implementing IAppModule are discovered at startup.</li>
+<li>Each module is checked against configuration under Modules:&lt;ModuleName&gt;:Enabled.</li>
+<li>Disabled modules are not registered into dependency injection.</li>
+<li>Disabled module controllers are excluded from MVC controller discovery.</li>
+<li>Disabled module endpoints are removed from Swagger.</li>
+<li>A protection filter also returns 404 if a disabled module controller is somehow reached.</li>
+</ul>
+<p>This makes modules operationally switchable through configuration without removing code from the project.</p>
+<h2>5. Runtime Configuration</h2>
+<p>The main runtime configuration is in appsettings.json.</p>
+<p>Current important settings:</p>
+<ul>
+<li>ConnectionStrings: database connections</li>
+<li>Modules: enables or disables modules</li>
+<li>Jwt: signing key and token expiry</li>
+<li>Logging</li>
+</ul>
+<p>Current module configuration behavior:</p>
+<ul>
+<li>Auth is enabled</li>
+<li>Payment is disabled</li>
+<li>KOT is not explicitly configured, so it is treated as enabled by default if a concrete module implementation exists</li>
+</ul>
+<p>Important note:</p>
+<ul>
+<li>Replace development secrets before any production deployment.</li>
+<li>Do not keep real database passwords or long-term JWT secrets in source control.</li>
+</ul>
+<h2>6. Running the Project</h2>
+<h3>Prerequisites</h3>
+<ul>
+<li>.NET SDK 10 installed</li>
+<li>A reachable database for the provider configured for Auth</li>
+</ul>
+<h3>Default development URLs</h3>
+<p>From launchSettings.json:</p>
+<ul>
+<li>HTTP: http://localhost:5019</li>
+<li>HTTPS: https://localhost:7117</li>
+</ul>
+<h3>Start the API</h3>
+<p>From the MyApi folder:</p>
+<pre><code>dotnet restore
+dotnet run</code></pre>
+<p>Swagger opens in development at:</p>
+<pre><code>http://localhost:5019/swagger</code></pre>
+<p>or</p>
+<pre><code>https://localhost:7117/swagger</code></pre>
+<h2>7. Authentication Setup</h2>
+<p>JWT authentication is configured in Program.cs.</p>
+<p>What happens during startup:</p>
+<ul>
+<li>The JWT key is loaded from configuration</li>
+<li>Bearer authentication is registered</li>
+<li>Issuer signing key validation is enabled</li>
+<li>Issuer and audience validation are currently disabled</li>
+<li>Authorization middleware is enabled</li>
+</ul>
+<p>For production hardening, consider:</p>
+<ul>
+<li>moving the JWT secret to environment variables or a secret store</li>
+<li>enabling issuer and audience validation</li>
+<li>rotating secrets regularly</li>
+</ul>
+<h2>8. Database Behavior</h2>
+<p>The Auth module supports two providers:</p>
+<ul>
+<li>sqlite</li>
+<li>mysql</li>
+</ul>
+<p>Provider resolution rules:</p>
+<ul>
+<li>If Modules:Auth:Database:Provider is set, that value is used.</li>
+<li>Otherwise the provider is inferred from the connection string.</li>
+<li>If nothing is configured, the fallback is SQLite using Data/myapi.db.</li>
+</ul>
+<p>Startup behavior:</p>
+<ul>
+<li>AuthDbContext is registered during module registration.</li>
+<li>The Auth module runs database migrations automatically during initialization.</li>
+</ul>
+<h2>9. Implemented Modules</h2>
+<h3>9.1 Auth Module</h3>
+<p>Purpose:</p>
+<ul>
+<li>user registration and login</li>
+<li>token refresh</li>
+<li>user management</li>
+<li>role management</li>
+<li>permission management</li>
+</ul>
+<p>Persistence:</p>
+<ul>
+<li>Entity Framework Core DbContext</li>
+<li>seeded roles and permissions</li>
+<li>automatic migration on startup</li>
+</ul>
+<p>Seeded data includes:</p>
+<ul>
+<li>roles: User, Admin</li>
+<li>permissions:</li>
+<p>- auth.profile.read - auth.profile.update - auth.tokens.refresh - auth.users.manage</p>
+</ul>
+<p>Implemented endpoints:</p>
+<pre><code>POST   /api/auth/login
+POST   /api/auth/register
+POST   /api/auth/refresh
+
+GET    /api/users
+GET    /api/users/{id}
+POST   /api/users
+PUT    /api/users/{id}
+DELETE /api/users/{id}
+
+GET    /api/roles
+GET    /api/roles/{id}
+POST   /api/roles
+PUT    /api/roles/{id}
+DELETE /api/roles/{id}
+
+GET    /api/permissions
+GET    /api/permissions/{id}
+POST   /api/permissions
+PUT    /api/permissions/{id}
+DELETE /api/permissions/{id}</code></pre>
+<h3>9.2 Payment Module</h3>
+<p>Purpose:</p>
+<ul>
+<li>demo payment charge and refund workflow</li>
+</ul>
+<p>Current status:</p>
+<ul>
+<li>implemented in memory only</li>
+<li>disabled by default in appsettings.json</li>
+<li>no persistent database storage</li>
+</ul>
+<p>Endpoints when enabled:</p>
+<pre><code>GET  /api/payments
+GET  /api/payments/{id}
+POST /api/payments/charge
+POST /api/payments/{id}/refund</code></pre>
+<h3>9.3 KOT Module</h3>
+<p>Current status:</p>
+<ul>
+<li>folder structure exists</li>
+<li>main files are empty placeholders</li>
+<li>no module class implementation yet</li>
+<li>no service, persistence, or API logic yet</li>
+</ul>
+<p>This means KOT is currently a scaffold target, not a working module.</p>
+<h2>10. How to Use the API</h2>
+<p>Recommended manual workflow:</p>
+<ol>
+<li>Start the project with dotnet run.</li>
+<li>Open Swagger.</li>
+<li>Register a user through /api/auth/register.</li>
+<li>Log in through /api/auth/login.</li>
+<li>Save the access token and refresh token.</li>
+<li>Use management endpoints for users, roles, and permissions.</li>
+<li>Refresh the token through /api/auth/refresh when needed.</li>
+</ol>
+<p>Example register request:</p>
+<pre><code>{
+  &quot;firstName&quot;: &quot;Admin&quot;,
+  &quot;lastName&quot;: &quot;User&quot;,
+  &quot;email&quot;: &quot;admin@example.com&quot;,
+  &quot;password&quot;: &quot;P@ssw0rd123&quot;
+}</code></pre>
+<p>Example login request:</p>
+<pre><code>{
+  &quot;email&quot;: &quot;admin@example.com&quot;,
+  &quot;password&quot;: &quot;P@ssw0rd123&quot;
+}</code></pre>
+<p>Example refresh request:</p>
+<pre><code>{
+  &quot;refreshToken&quot;: &quot;paste-refresh-token-here&quot;
+}</code></pre>
+<p>To call authenticated endpoints from a client:</p>
+<pre><code>Authorization: Bearer &lt;access-token&gt;</code></pre>
+<h2>11. Module Enable or Disable</h2>
+<p>Modules are controlled from appsettings.json.</p>
+<p>Example:</p>
+<pre><code>&quot;Modules&quot;: {
+  &quot;Auth&quot;: {
+    &quot;Enabled&quot;: true,
+    &quot;Database&quot;: {
+      &quot;Provider&quot;: &quot;mysql&quot;,
+      &quot;ConnectionStringName&quot;: &quot;Repository&quot;
+    }
+  },
+  &quot;Payment&quot;: {
+    &quot;Enabled&quot;: false
+  },
+  &quot;KOT&quot;: {
+    &quot;Enabled&quot;: false
+  }
+}</code></pre>
+<p>When a module is disabled:</p>
+<ul>
+<li>its services are not registered</li>
+<li>its controllers are not loaded</li>
+<li>its endpoints are removed from Swagger</li>
+<li>direct requests return 404</li>
+</ul>
+<h2>12. Fixed Module Scaffold Command</h2>
+<p>The original ad hoc command creates the folder tree and empty files, but it is hard to reuse and does not validate input.</p>
+<p>Original command:</p>
+<pre><code>MODULE=KOT &amp;&amp; ROOT=&quot;Modules/$MODULE&quot; &amp;&amp; mkdir -p &quot;$ROOT&quot;/{Application/DTOs,Application/Interfaces,Controllers,Domain/Entities,Persistence/Migrations,Services} &amp;&amp; touch &quot;$ROOT/${MODULE}ModuleExtensions.cs&quot; &quot;$ROOT/Application/DTOs/${MODULE}Dtos.cs&quot; &quot;$ROOT/Application/Interfaces/I${MODULE}Service.cs&quot; &quot;$ROOT/Controllers/${MODULE}Controller.cs&quot; &quot;$ROOT/Domain/Entities/${MODULE}Entity.cs&quot; &quot;$ROOT/Persistence/${MODULE}DbContext.cs&quot; &quot;$ROOT/Persistence/${MODULE}DatabaseConfiguration.cs&quot; &quot;$ROOT/Persistence/${MODULE}DbContextFactory.cs&quot; &quot;$ROOT/Persistence/${MODULE}SeedData.cs&quot; &quot;$ROOT/Services/${MODULE}Service.cs&quot;</code></pre>
+<p>Preferred fixed usage:</p>
+<pre><code>./scripts/scaffold-module.sh KOT</code></pre>
+<p>What the fixed script improves:</p>
+<ul>
+<li>validates the module name argument</li>
+<li>works for any module name without editing the command</li>
+<li>creates the same structure consistently</li>
+<li>avoids repeating a long shell one-liner in documentation or terminal history</li>
+</ul>
+<p>If you still want a one-line version, use this cleaner form from the MyApi folder:</p>
+<pre><code>MODULE=&quot;KOT&quot;; ROOT=&quot;Modules/$MODULE&quot;; mkdir -p &quot;$ROOT&quot;/{Application/DTOs,Application/Interfaces,Controllers,Domain/Entities,Persistence/Migrations,Services}; touch &quot;$ROOT/${MODULE}ModuleExtensions.cs&quot; &quot;$ROOT/Application/DTOs/${MODULE}Dtos.cs&quot; &quot;$ROOT/Application/Interfaces/I${MODULE}Service.cs&quot; &quot;$ROOT/Controllers/${MODULE}Controller.cs&quot; &quot;$ROOT/Domain/Entities/${MODULE}Entity.cs&quot; &quot;$ROOT/Persistence/${MODULE}DbContext.cs&quot; &quot;$ROOT/Persistence/${MODULE}DatabaseConfiguration.cs&quot; &quot;$ROOT/Persistence/${MODULE}DbContextFactory.cs&quot; &quot;$ROOT/Persistence/${MODULE}SeedData.cs&quot; &quot;$ROOT/Services/${MODULE}Service.cs&quot;</code></pre>
+<h2>13. Recommended Next Steps for KOT</h2>
+<p>To turn KOT into a working module, implement these pieces:</p>
+<ol>
+<li>Add a concrete KOT module class implementing IAppModule.</li>
+<li>Define DTOs and service interfaces.</li>
+<li>Implement controllers and services.</li>
+<li>Add persistence if KOT needs a database.</li>
+<li>Add configuration under Modules:KOT.</li>
+<li>Add tests for service and controller behavior.</li>
+</ol>
+<h2>14. Known Gaps</h2>
+<ul>
+<li>There is no consolidated README for the solution root yet.</li>
+<li>KOT is scaffolded but not implemented.</li>
+<li>Payment uses in-memory storage only.</li>
+<li>Auth controller actions do not yet expose structured validation or authorization policies for each management endpoint.</li>
+<li>Production secrets handling still needs tightening.</li>
+</ul>
+<h2>15. Document Output</h2>
+<p>This Markdown file is the source used for the PDF version of the project guide.</p>
+<p>Generated output:</p>
+<ul>
+<li>docs/PROJECT_GUIDE.md</li>
+<li>docs/PROJECT_GUIDE.pdf</li>
+</ul>
+</body></html>
