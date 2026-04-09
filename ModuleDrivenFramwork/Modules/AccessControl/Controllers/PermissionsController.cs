@@ -1,30 +1,32 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ModuleDrivenFramwork.Modules.Auth.Application.DTOs.AuthManagement;
-using ModuleDrivenFramwork.Modules.Auth.Application.Interfaces;
+using ModuleDrivenFramwork.Modules.AccessControl.Application.DTOs;
+using ModuleDrivenFramwork.Modules.AccessControl.Services;
 
-namespace ModuleDrivenFramwork.Modules.Auth.Controllers;
+namespace ModuleDrivenFramwork.Modules.AccessControl.Controllers;
 
 [ApiController]
 [Route("api/permissions")]
+[AllowAnonymous]
 public class PermissionsController : ControllerBase
 {
-    private readonly IAuthManagementService _authManagementService;
+    private readonly IAccessControlService _accessControl;
 
-    public PermissionsController(IAuthManagementService authManagementService)
+    public PermissionsController(IAccessControlService accessControl)
     {
-        _authManagementService = authManagementService;
+        _accessControl = accessControl;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<PermissionDto>>> GetAll()
     {
-        return Ok(await _authManagementService.GetPermissionsAsync());
+        return Ok(await _accessControl.GetPermissionsAsync());
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<PermissionDto>> GetById(Guid id)
     {
-        var permission = await _authManagementService.GetPermissionAsync(id);
+        var permission = await _accessControl.GetPermissionAsync(id);
         return permission == null ? NotFound() : Ok(permission);
     }
 
@@ -33,7 +35,7 @@ public class PermissionsController : ControllerBase
     {
         try
         {
-            var permission = await _authManagementService.CreatePermissionAsync(request);
+            var permission = await _accessControl.CreatePermissionAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = permission.Id }, permission);
         }
         catch (InvalidOperationException exception)
@@ -47,11 +49,15 @@ public class PermissionsController : ControllerBase
     {
         try
         {
-            return Ok(await _authManagementService.UpdatePermissionAsync(id, request));
+            return Ok(await _accessControl.UpdatePermissionAsync(id, request));
         }
         catch (InvalidOperationException exception) when (exception.Message == "Permission not found.")
         {
             return NotFound(new { error = exception.Message });
+        }
+        catch (InvalidOperationException exception) when (exception.Message.Contains("modified or deleted"))
+        {
+            return Conflict(new { error = exception.Message });
         }
         catch (InvalidOperationException exception)
         {
@@ -64,12 +70,16 @@ public class PermissionsController : ControllerBase
     {
         try
         {
-            await _authManagementService.DeletePermissionAsync(id);
+            await _accessControl.DeletePermissionAsync(id);
             return NoContent();
         }
         catch (InvalidOperationException exception) when (exception.Message == "Permission not found.")
         {
             return NotFound(new { error = exception.Message });
+        }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(new { error = exception.Message });
         }
     }
 }

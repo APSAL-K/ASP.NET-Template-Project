@@ -24,9 +24,9 @@ public class AuthController : ControllerBase
             var result = await _auth.LoginAsync(req);
             return Ok(result);
         }
-        catch
+        catch (System.Exception ex)
         {
-            return Unauthorized();
+            return Unauthorized(new { error = ex.Message });
         }
     }
 

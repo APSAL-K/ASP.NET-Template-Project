@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ModuleDrivenFramwork.Modules.Auth.Application.DTOs.Auth;
 using ModuleDrivenFramwork.Modules.Auth.Application.Interfaces;
 using ModuleDrivenFramwork.Modules.Auth.Domain.Entities;
+using ModuleDrivenFramwork.Modules.AccessControl.Services;
 
 namespace ModuleDrivenFramwork.Modules.Auth.Services;
 
@@ -11,12 +12,18 @@ public class AuthService : IAuthService
     private readonly IAuthUserStore _store;
     private readonly IPasswordHasher _hasher;
     private readonly IJwtTokenGenerator _jwt;
+    private readonly IAccessControlService _accessControl;
 
-    public AuthService(IAuthUserStore store, IPasswordHasher hasher, IJwtTokenGenerator jwt)
+    public AuthService(
+        IAuthUserStore store, 
+        IPasswordHasher hasher, 
+        IJwtTokenGenerator jwt,
+        IAccessControlService accessControl)
     {
         _store = store;
         _hasher = hasher;
         _jwt = jwt;
+        _accessControl = accessControl;
     }
 
     public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO request, string ipAddress = "")
@@ -30,10 +37,10 @@ public class AuthService : IAuthService
 
         await _store.EnsureDefaultRoleAssignedAsync(user.Id);
 
-        var roles = await _store.GetUserRolesAsync(user.Id);
-        var permissions = await _store.GetUserPermissionsAsync(user.Id);
+        var roleIds = await _store.GetUserRoleIdsAsync(user.Id);
+        var securityContext = await _accessControl.GetSecurityContextAsync(roleIds);
 
-        var access = _jwt.GenerateAccessToken(user, roles, permissions);
+        var access = _jwt.GenerateAccessToken(user, securityContext.Roles, securityContext.Permissions);
         var refresh = _jwt.GenerateRefreshToken(user, ipAddress);
 
         await _store.AddRefreshTokenAsync(refresh);
@@ -48,8 +55,8 @@ public class AuthService : IAuthService
             AccessToken = access,
             RefreshToken = refresh.Token,
             TokenExpiresAt = DateTime.UtcNow.AddMinutes(60),
-            Roles = roles,
-            Permissions = permissions
+            Roles = securityContext.Roles,
+            Permissions = securityContext.Permissions
         };
     }
 
@@ -64,34 +71,42 @@ public class AuthService : IAuthService
         var user = new User
         {
             Id = Guid.NewGuid(),
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Email = request.Email,
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
+            Email = request.Email.Trim().ToLower(),
             CreatedAt = DateTime.UtcNow,
             PasswordHash = passwordHash,
-            PasswordSalt = passwordSalt
+            PasswordSalt = passwordSalt,
+            IsActive = true
         };
 
-        await _store.AddAsync(user);
-        await _store.EnsureDefaultRoleAssignedAsync(user.Id);
-
-        var roles = await _store.GetUserRolesAsync(user.Id);
-        var permissions = await _store.GetUserPermissionsAsync(user.Id);
-
-        var access = _jwt.GenerateAccessToken(user, roles, permissions);
-        var refresh = _jwt.GenerateRefreshToken(user, ipAddress);
-        await _store.AddRefreshTokenAsync(refresh);
-
-        return new LoginResponseDTO
+        try 
         {
-            UserId = user.Id,
-            Email = user.Email,
-            AccessToken = access,
-            RefreshToken = refresh.Token,
-            TokenExpiresAt = refresh.ExpiryDate,
-            Roles = roles,
-            Permissions = permissions
-        };
+            await _store.AddAsync(user);
+            await _store.EnsureDefaultRoleAssignedAsync(user.Id);
+
+            var roleIds = await _store.GetUserRoleIdsAsync(user.Id);
+            var securityContext = await _accessControl.GetSecurityContextAsync(roleIds);
+
+            var access = _jwt.GenerateAccessToken(user, securityContext.Roles, securityContext.Permissions);
+            var refresh = _jwt.GenerateRefreshToken(user, ipAddress);
+            await _store.AddRefreshTokenAsync(refresh);
+
+            return new LoginResponseDTO
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                AccessToken = access,
+                RefreshToken = refresh.Token,
+                TokenExpiresAt = refresh.ExpiryDate,
+                Roles = securityContext.Roles,
+                Permissions = securityContext.Permissions
+            };
+        }
+        catch (System.Exception ex)
+        {
+            throw new InvalidOperationException($"Registration failed during record creation: {ex.Message}", ex);
+        }
     }
 
     public async Task<TokenResponseDTO> RefreshTokenAsync(string refreshToken, string ipAddress = "")
@@ -106,12 +121,12 @@ public class AuthService : IAuthService
 
         await _store.EnsureDefaultRoleAssignedAsync(user.Id);
 
-        var roles = await _store.GetUserRolesAsync(user.Id);
-        var permissions = await _store.GetUserPermissionsAsync(user.Id);
+        var roleIds = await _store.GetUserRoleIdsAsync(user.Id);
+        var securityContext = await _accessControl.GetSecurityContextAsync(roleIds);
 
         await _store.RevokeRefreshTokenAsync(tokenEntity);
 
-        var newAccess = _jwt.GenerateAccessToken(user, roles, permissions);
+        var newAccess = _jwt.GenerateAccessToken(user, securityContext.Roles, securityContext.Permissions);
         var newRefresh = _jwt.GenerateRefreshToken(user, ipAddress);
         await _store.AddRefreshTokenAsync(newRefresh);
 
@@ -120,8 +135,8 @@ public class AuthService : IAuthService
             AccessToken = newAccess,
             RefreshToken = newRefresh.Token,
             ExpiresAt = DateTime.UtcNow.AddMinutes(60),
-            Roles = roles,
-            Permissions = permissions
+            Roles = securityContext.Roles,
+            Permissions = securityContext.Permissions
         };
     }
 }

@@ -1,0 +1,403 @@
+/* Modern SaaS Precision Layout */
+.console-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg);
+}
+
+/* Sidebar - Solid Professional */
+.sidebar {
+  width: 280px;
+  background-color: var(--bg-soft);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-header {
+  height: 72px;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+
+.sidebar-logo-box {
+  background: var(--grad-primary);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.3);
+}
+
+.sidebar-brand {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+  color: #fff;
+  margin-left: 10px;
+}
+
+.sidebar-nav {
+  padding: 2rem 1rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-section-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--text-soft);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
+  border: 1px solid transparent;
+}
+
+.nav-link:hover {
+  background-color: var(--bg-card);
+  color: #fff;
+}
+
+.nav-link.active {
+  background-color: var(--accent-soft);
+  color: var(--accent-strong);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.sidebar-footer {
+  padding: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.user-profile-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  min-height: 100vh;
+  padding: 2.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Breadcrumb / Section Header */
+.section-header-group {
+  margin-bottom: 3rem;
+}
+
+.breadcrumb-trail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.breadcrumb-item {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: 2.25rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+/* Premium Card - SaaS Solid */
+.premium-card {
+  background-color: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.premium-card-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+/* Premium Table V4 - Crisp Management */
+.premium-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.premium-table th {
+  padding: 1rem 2rem;
+  background-color: rgba(255, 255, 255, 0.02);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--line-strong);
+  text-align: left;
+}
+
+.premium-table td {
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+
+.premium-table tr:hover td {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+/* Forms - Focused Full Width */
+.crud-form-header {
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-field {
+  margin-bottom: 1.75rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-soft);
+}
+
+input, select, textarea {
+  width: 100%;
+  background-color: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Toast Notifications - Top Right Corner */
+.toast-viewport {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 360px;
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  background-color: #1f2937;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-xl);
+  animation: toast-slide-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.toast-card--success::before { background-color: var(--success); }
+.toast-card--error::before { background-color: var(--danger); }
+.toast-card--info::before { background-color: var(--accent); }
+
+@keyframes toast-slide-right {
+  from { transform: translateX(110%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: white;
+}
+
+.btn-primary:hover { background-color: var(--accent-strong); transform: translateY(-1px); }
+
+.btn-secondary {
+  background-color: var(--bg-card);
+  border: 1px solid var(--line-strong);
+  color: var(--text-soft);
+}
+
+.btn-secondary:hover { background-color: rgba(255,255,255,0.05); color: #fff; }
+
+.btn-ghost {
+  color: var(--muted);
+  background: transparent;
+  padding: 6px;
+}
+
+/* --- Authentication Pages --- */
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--bg-soft);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xl);
+  padding: 3.5rem 3rem;
+  box-shadow: var(--shadow-xl);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.auth-header h1 {
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.auth-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.auth-form input {
+  background-color: var(--bg);
+  border: 1px solid var(--line-strong);
+  height: 52px;
+  padding: 0 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.form-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 2.5rem 1.5rem;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

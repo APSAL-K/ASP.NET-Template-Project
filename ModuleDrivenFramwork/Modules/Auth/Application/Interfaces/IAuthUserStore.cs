@@ -12,8 +12,7 @@ public interface IAuthUserStore
     Task AddAsync(User user);
     Task UpdateAsync(User user);
     Task EnsureDefaultRoleAssignedAsync(Guid userId);
-    Task<IEnumerable<string>> GetUserRolesAsync(Guid userId);
-    Task<IEnumerable<string>> GetUserPermissionsAsync(Guid userId);
+    Task<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId);
     Task<RefreshToken?> GetRefreshTokenAsync(string token);
     Task AddRefreshTokenAsync(RefreshToken token);
     Task RevokeRefreshTokenAsync(RefreshToken token);

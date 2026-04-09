@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap');
+
+:root {
+  /* Modern SaaS Precision Palette - Solid Foundations */
+  --bg: #0b0f1a;
+  --bg-soft: #111827;
+  --bg-card: #1f2937;
+  
+  --panel: #111827;
+  --panel-strong: #1f2937;
+  
+  --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.12);
+  
+  --text: #f9fafb;
+  --text-soft: #d1d5db;
+  --muted: #6b7280;
+  
+  --accent: #4f46e5;
+  --accent-strong: #6366f1;
+  --accent-soft: rgba(79, 70, 229, 0.1);
+  
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  
+  --grad-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  
+  --radius-xl: 16px;
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 4px;
+  
+  --sans: 'Inter', system-ui, sans-serif;
+  --display: 'Outfit', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  color-scheme: dark;
+  color: var(--text);
+  background-color: var(--bg);
+  font-family: var(--sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

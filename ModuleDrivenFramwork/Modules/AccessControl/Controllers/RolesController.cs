@@ -1,30 +1,33 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ModuleDrivenFramwork.Modules.Auth.Application.DTOs.AuthManagement;
-using ModuleDrivenFramwork.Modules.Auth.Application.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using ModuleDrivenFramwork.Modules.AccessControl.Application.DTOs;
+using ModuleDrivenFramwork.Modules.AccessControl.Services;
 
-namespace ModuleDrivenFramwork.Modules.Auth.Controllers;
+namespace ModuleDrivenFramwork.Modules.AccessControl.Controllers;
 
 [ApiController]
 [Route("api/roles")]
+[AllowAnonymous]
 public class RolesController : ControllerBase
 {
-    private readonly IAuthManagementService _authManagementService;
+    private readonly IAccessControlService _accessControl;
 
-    public RolesController(IAuthManagementService authManagementService)
+    public RolesController(IAccessControlService accessControl)
     {
-        _authManagementService = authManagementService;
+        _accessControl = accessControl;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<RoleDto>>> GetAll()
     {
-        return Ok(await _authManagementService.GetRolesAsync());
+        return Ok(await _accessControl.GetRolesAsync());
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<RoleDto>> GetById(Guid id)
     {
-        var role = await _authManagementService.GetRoleAsync(id);
+        var role = await _accessControl.GetRoleAsync(id);
         return role == null ? NotFound() : Ok(role);
     }
 
@@ -33,7 +36,7 @@ public class RolesController : ControllerBase
     {
         try
         {
-            var role = await _authManagementService.CreateRoleAsync(request);
+            var role = await _accessControl.CreateRoleAsync(request);
             return CreatedAtAction(nameof(GetById), new { id = role.Id }, role);
         }
         catch (InvalidOperationException exception)
@@ -47,11 +50,15 @@ public class RolesController : ControllerBase
     {
         try
         {
-            return Ok(await _authManagementService.UpdateRoleAsync(id, request));
+            return Ok(await _accessControl.UpdateRoleAsync(id, request));
         }
         catch (InvalidOperationException exception) when (exception.Message == "Role not found.")
         {
             return NotFound(new { error = exception.Message });
+        }
+        catch (InvalidOperationException exception) when (exception.Message.Contains("modified or deleted"))
+        {
+            return Conflict(new { error = exception.Message });
         }
         catch (InvalidOperationException exception)
         {
@@ -64,7 +71,7 @@ public class RolesController : ControllerBase
     {
         try
         {
-            await _authManagementService.DeleteRoleAsync(id);
+            await _accessControl.DeleteRoleAsync(id);
             return NoContent();
         }
         catch (InvalidOperationException exception) when (exception.Message == "Role not found.")

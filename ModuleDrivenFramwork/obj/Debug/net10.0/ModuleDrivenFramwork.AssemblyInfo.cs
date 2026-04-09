@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ModuleDrivenFramwork")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0138e8788f16449ee88abeaa5ac911bfea24f81d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f760838d5a537f8ba569e5a236d2ccc7535e1d57")]
 [assembly: System.Reflection.AssemblyProductAttribute("ModuleDrivenFramwork")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ModuleDrivenFramwork")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

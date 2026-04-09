@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace ModuleDrivenFramwork.Modules.Auth.Domain.Entities;
+namespace ModuleDrivenFramwork.Modules.AccessControl.Domain.Entities;
 
-public class Permission
+public class Role
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

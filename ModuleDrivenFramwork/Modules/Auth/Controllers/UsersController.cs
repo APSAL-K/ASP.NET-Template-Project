@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ModuleDrivenFramwork.Modules.Auth.Application.DTOs.AuthManagement;
 using ModuleDrivenFramwork.Modules.Auth.Application.Interfaces;
@@ -6,6 +7,7 @@ namespace ModuleDrivenFramwork.Modules.Auth.Controllers;
 
 [ApiController]
 [Route("api/users")]
+[AllowAnonymous]
 public class UsersController : ControllerBase
 {
     private readonly IAuthManagementService _authManagementService;
@@ -52,6 +54,10 @@ public class UsersController : ControllerBase
         catch (InvalidOperationException exception) when (exception.Message == "User not found.")
         {
             return NotFound(new { error = exception.Message });
+        }
+        catch (InvalidOperationException exception) when (exception.Message.Contains("modified or deleted"))
+        {
+            return Conflict(new { error = exception.Message });
         }
         catch (InvalidOperationException exception)
         {

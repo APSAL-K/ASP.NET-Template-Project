@@ -12,10 +12,7 @@ public class AuthDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-    public DbSet<Role> Roles => Set<Role>();
-    public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
-    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,39 +44,11 @@ public class AuthDbContext : DbContext
             entity.HasIndex(token => token.Token).IsUnique();
         });
 
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.ToTable("AuthRoles");
-            entity.HasKey(role => role.Id);
-            entity.Property(role => role.Name).IsRequired().HasMaxLength(100);
-            entity.Property(role => role.Description).IsRequired().HasMaxLength(500);
-            entity.HasIndex(role => role.Name).IsUnique();
-            entity.HasData(AuthSeedData.Roles);
-        });
-
-        modelBuilder.Entity<Permission>(entity =>
-        {
-            entity.ToTable("AuthPermissions");
-            entity.HasKey(permission => permission.Id);
-            entity.Property(permission => permission.Name).IsRequired().HasMaxLength(150);
-            entity.Property(permission => permission.Description).IsRequired().HasMaxLength(500);
-            entity.HasIndex(permission => permission.Name).IsUnique();
-            entity.HasData(AuthSeedData.Permissions);
-        });
-
         modelBuilder.Entity<UserRole>(entity =>
         {
             entity.ToTable("AuthUserRoles");
             entity.HasKey(userRole => userRole.Id);
             entity.HasIndex(userRole => new { userRole.UserId, userRole.RoleId }).IsUnique();
-        });
-
-        modelBuilder.Entity<RolePermission>(entity =>
-        {
-            entity.ToTable("AuthRolePermissions");
-            entity.HasKey(rolePermission => rolePermission.Id);
-            entity.HasIndex(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionId }).IsUnique();
-            entity.HasData(AuthSeedData.RolePermissions);
         });
     }
 }

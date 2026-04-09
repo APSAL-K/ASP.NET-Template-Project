@@ -48,34 +48,25 @@ public class AuthUserStore : IAuthUserStore
             return;
         }
 
-        var defaultRole = await _dbContext.Roles.FirstAsync(role => role.Name == AuthSeedData.UserRoleName);
+        // We use a hardcoded Guid for the default User role to avoid dependency on Role names in the store
+        var userRoleId = Guid.Parse("0c6b3d90-5513-4c67-9d7f-5bc2b4e2d9c1");
+
         _dbContext.UserRoles.Add(new UserRole
         {
             UserId = userId,
-            RoleId = defaultRole.Id,
+            RoleId = userRoleId,
             AssignedAt = DateTime.UtcNow
         });
 
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<string>> GetUserRolesAsync(Guid userId)
+    public async Task<IEnumerable<Guid>> GetUserRoleIdsAsync(Guid userId)
     {
         return await _dbContext.UserRoles
             .Where(userRole => userRole.UserId == userId)
-            .Select(userRole => userRole.Role.Name)
+            .Select(userRole => userRole.RoleId)
             .Distinct()
-            .OrderBy(roleName => roleName)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<string>> GetUserPermissionsAsync(Guid userId)
-    {
-        return await _dbContext.UserRoles
-            .Where(userRole => userRole.UserId == userId)
-            .SelectMany(userRole => userRole.Role.RolePermissions.Select(rolePermission => rolePermission.Permission.Name))
-            .Distinct()
-            .OrderBy(permissionName => permissionName)
             .ToListAsync();
     }
 

@@ -21,7 +21,7 @@ public sealed class AuthModule : IAppModule
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<IAuthUserStore, AuthUserStore>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IAuthManagementService, AuthManagementService>();
+        services.AddScoped<IAuthManagementService, IdentityManagementService>();
     }
 
     public async Task InitializeAsync(IServiceProvider serviceProvider, IConfiguration configuration, CancellationToken cancellationToken = default)
