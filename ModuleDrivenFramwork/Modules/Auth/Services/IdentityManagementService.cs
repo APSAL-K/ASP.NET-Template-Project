@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ModuleDrivenFramwork.Common.Models;
 using ModuleDrivenFramwork.Modules.Auth.Application.DTOs.AuthManagement;
 using ModuleDrivenFramwork.Modules.Auth.Application.Interfaces;
 using ModuleDrivenFramwork.Modules.Auth.Domain.Entities;
@@ -23,11 +24,16 @@ public class IdentityManagementService : IAuthManagementService
         _accessControl = accessControl;
     }
 
-    public async Task<IReadOnlyList<UserDto>> GetUsersAsync()
+    public async Task<PaginatedResult<UserDto>> GetUsersAsync(int pageNumber, int pageSize)
     {
-        var users = await _dbContext.Users
+        var query = _dbContext.Users
             .Include(u => u.UserRoles)
-            .OrderBy(u => u.Email)
+            .OrderBy(u => u.Email);
+
+        var total = await query.CountAsync();
+        var users = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
         var result = new List<UserDto>();
@@ -35,7 +41,8 @@ public class IdentityManagementService : IAuthManagementService
         {
             result.Add(await MapUserAsync(user));
         }
-        return result;
+        
+        return new PaginatedResult<UserDto>(result, total, pageNumber, pageSize);
     }
 
     public async Task<UserDto?> GetUserAsync(Guid userId)

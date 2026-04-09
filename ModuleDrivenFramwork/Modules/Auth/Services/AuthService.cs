@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using ModuleDrivenFramwork.Modules.Auth.Application.DTOs.Auth;
 using ModuleDrivenFramwork.Modules.Auth.Application.Interfaces;
 using ModuleDrivenFramwork.Modules.Auth.Domain.Entities;
@@ -38,6 +40,16 @@ public class AuthService : IAuthService
         await _store.EnsureDefaultRoleAssignedAsync(user.Id);
 
         var roleIds = await _store.GetUserRoleIdsAsync(user.Id);
+        
+        // Handle explicit role selection if requested
+        if (request.RoleId.HasValue)
+        {
+            if (!roleIds.Contains(request.RoleId.Value))
+                throw new InvalidOperationException("Unauthorized for the selected role.");
+            
+            roleIds = new List<Guid> { request.RoleId.Value };
+        }
+
         var securityContext = await _accessControl.GetSecurityContextAsync(roleIds);
 
         var access = _jwt.GenerateAccessToken(user, securityContext.Roles, securityContext.Permissions);
@@ -83,7 +95,16 @@ public class AuthService : IAuthService
         try 
         {
             await _store.AddAsync(user);
-            await _store.EnsureDefaultRoleAssignedAsync(user.Id);
+            
+            // Assign explicitly requested roles or default
+            if (request.RoleIds != null && request.RoleIds.Any())
+            {
+                await _store.AssignRolesAsync(user.Id, request.RoleIds);
+            }
+            else
+            {
+                await _store.EnsureDefaultRoleAssignedAsync(user.Id);
+            }
 
             var roleIds = await _store.GetUserRoleIdsAsync(user.Id);
             var securityContext = await _accessControl.GetSecurityContextAsync(roleIds);

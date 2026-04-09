@@ -1,6 +1,7 @@
 export type LoginRequest = {
   email: string
   password: string
+  roleId?: string
 }
 
 export type RegisterRequest = {
@@ -8,6 +9,7 @@ export type RegisterRequest = {
   lastName: string
   email: string
   password: string
+  roleIds?: string[]
 }
 
 export type LoginResponse = {
@@ -112,4 +114,14 @@ export type AuthSession = {
   expiresAt: string
   roles: string[]
   permissions: string[]
+}
+
+export type PaginatedResult<T> = {
+  items: T[]
+  totalCount: number
+  pageNumber: number
+  pageSize: number
+  totalPages: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
 }

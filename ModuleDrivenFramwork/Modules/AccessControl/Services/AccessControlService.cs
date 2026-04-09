@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ModuleDrivenFramwork.Common.Models;
 using ModuleDrivenFramwork.Modules.AccessControl.Application.DTOs;
 using ModuleDrivenFramwork.Modules.AccessControl.Domain.Entities;
 using ModuleDrivenFramwork.Modules.AccessControl.Persistence;
@@ -41,14 +42,25 @@ public class AccessControlService : IAccessControlService
         return new SecurityContextDto(roleNames, permissions);
     }
 
-    public async Task<IReadOnlyList<RoleDto>> GetRolesAsync()
+    public async Task<PaginatedResult<RoleDto>> GetRolesAsync(int pageNumber, int pageSize)
     {
-        var roles = await _dbContext.Roles
+        var query = _dbContext.Roles
             .Include(r => r.RolePermissions)
                 .ThenInclude(rp => rp.Permission)
-            .OrderBy(r => r.Name)
+            .OrderBy(r => r.Name);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
-        return roles.Select(MapRole).ToList();
+
+        return new PaginatedResult<RoleDto>(
+            items.Select(MapRole).ToList(),
+            total,
+            pageNumber,
+            pageSize
+        );
     }
 
     public async Task<RoleDto?> GetRoleAsync(Guid roleId)
@@ -127,12 +139,24 @@ public class AccessControlService : IAccessControlService
         return new DeleteResult(true);
     }
 
-    public async Task<IReadOnlyList<PermissionDto>> GetPermissionsAsync()
+    public async Task<PaginatedResult<PermissionDto>> GetPermissionsAsync(int pageNumber, int pageSize)
     {
-        return await _dbContext.Permissions
-            .OrderBy(p => p.Name)
+        var query = _dbContext.Permissions
+            .OrderBy(p => p.Name);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .Select(p => new PermissionDto { Id = p.Id, Name = p.Name, Description = p.Description })
             .ToListAsync();
+
+        return new PaginatedResult<PermissionDto>(
+            items,
+            total,
+            pageNumber,
+            pageSize
+        );
     }
 
     public async Task<PermissionDto?> GetPermissionAsync(Guid permissionId)

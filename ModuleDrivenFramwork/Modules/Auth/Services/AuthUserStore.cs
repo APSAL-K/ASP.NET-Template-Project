@@ -48,7 +48,7 @@ public class AuthUserStore : IAuthUserStore
             return;
         }
 
-        // We use a hardcoded Guid for the default User role to avoid dependency on Role names in the store
+        // Default role assignment if none specified
         var userRoleId = Guid.Parse("0c6b3d90-5513-4c67-9d7f-5bc2b4e2d9c1");
 
         _dbContext.UserRoles.Add(new UserRole
@@ -68,6 +68,28 @@ public class AuthUserStore : IAuthUserStore
             .Select(userRole => userRole.RoleId)
             .Distinct()
             .ToListAsync();
+    }
+
+    public async Task AssignRolesAsync(Guid userId, IEnumerable<Guid> roleIds)
+    {
+        var currentRoles = await _dbContext.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .ToListAsync();
+
+        _dbContext.UserRoles.RemoveRange(currentRoles);
+
+        foreach (var roleId in roleIds)
+        {
+            _dbContext.UserRoles.Add(new UserRole
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                RoleId = roleId,
+                AssignedAt = DateTime.UtcNow
+            });
+        }
+
+        await _dbContext.SaveChangesAsync();
     }
 
     public Task<RefreshToken?> GetRefreshTokenAsync(string token)

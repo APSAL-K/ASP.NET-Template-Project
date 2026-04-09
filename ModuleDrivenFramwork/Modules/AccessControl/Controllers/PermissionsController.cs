@@ -18,9 +18,10 @@ public class PermissionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<PermissionDto>>> GetAll()
+    public async Task<IActionResult> GetPermissions([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(await _accessControl.GetPermissionsAsync());
+        var result = await _accessControl.GetPermissionsAsync(pageNumber, pageSize);
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}")]

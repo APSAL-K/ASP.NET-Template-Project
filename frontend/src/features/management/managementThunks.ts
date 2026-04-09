@@ -5,6 +5,7 @@ import type {
   CreatePermissionRequest,
   CreateRoleRequest,
   CreateUserRequest,
+  PaginatedResult,
   PermissionDto,
   RoleDto,
   UpdatePermissionRequest,
@@ -15,9 +16,9 @@ import type {
 import { pushToast } from '../ui/uiSlice'
 
 type OverviewPayload = {
-  permissions: PermissionDto[]
-  roles: RoleDto[]
-  users: UserDto[]
+  permissions: PaginatedResult<PermissionDto>
+  roles: PaginatedResult<RoleDto>
+  users: PaginatedResult<UserDto>
 }
 
 function readSessionContext(state: RootState) {
@@ -56,9 +57,9 @@ export const fetchOverviewThunk = createAsyncThunk<OverviewPayload, void, { stat
 
     try {
       const [users, roles, permissions] = await Promise.all([
-        managementApi.listUsers(apiBaseUrl, accessToken),
-        managementApi.listRoles(apiBaseUrl, accessToken),
-        managementApi.listPermissions(apiBaseUrl, accessToken),
+        managementApi.listUsers(apiBaseUrl, 1, 10, accessToken),
+        managementApi.listRoles(apiBaseUrl, 1, 10, accessToken),
+        managementApi.listPermissions(apiBaseUrl, 1, 10, accessToken),
       ])
 
       return { users, roles, permissions }
@@ -68,6 +69,48 @@ export const fetchOverviewThunk = createAsyncThunk<OverviewPayload, void, { stat
       return thunkApi.rejectWithValue(message)
     }
   },
+)
+
+export const fetchUsersThunk = createAsyncThunk<PaginatedResult<UserDto>, { page: number; pageSize?: number }, { state: RootState; rejectValue: string }>(
+  'management/fetchUsers',
+  async ({ page, pageSize = 10 }, thunkApi) => {
+    const { apiBaseUrl, accessToken } = readSessionContext(thunkApi.getState())
+    try {
+      return await managementApi.listUsers(apiBaseUrl, page, pageSize, accessToken)
+    } catch (error) {
+      const message = describeApiError(error)
+      thunkApi.dispatch(pushToast({ kind: 'error', title: 'User fetch failed', description: message }))
+      return thunkApi.rejectWithValue(message)
+    }
+  }
+)
+
+export const fetchRolesThunk = createAsyncThunk<PaginatedResult<RoleDto>, { page: number; pageSize?: number }, { state: RootState; rejectValue: string }>(
+  'management/fetchRoles',
+  async ({ page, pageSize = 10 }, thunkApi) => {
+    const { apiBaseUrl, accessToken } = readSessionContext(thunkApi.getState())
+    try {
+      return await managementApi.listRoles(apiBaseUrl, page, pageSize, accessToken)
+    } catch (error) {
+      const message = describeApiError(error)
+      thunkApi.dispatch(pushToast({ kind: 'error', title: 'Role fetch failed', description: message }))
+      return thunkApi.rejectWithValue(message)
+    }
+  }
+)
+
+export const fetchPermissionsThunk = createAsyncThunk<PaginatedResult<PermissionDto>, { page: number; pageSize?: number }, { state: RootState; rejectValue: string }>(
+  'management/fetchPermissions',
+  async ({ page, pageSize = 10 }, thunkApi) => {
+    const { apiBaseUrl, accessToken } = readSessionContext(thunkApi.getState())
+    try {
+      return await managementApi.listPermissions(apiBaseUrl, page, pageSize, accessToken)
+    } catch (error) {
+      const message = describeApiError(error)
+      thunkApi.dispatch(pushToast({ kind: 'error', title: 'Permission fetch failed', description: message }))
+      return thunkApi.rejectWithValue(message)
+    }
+  }
 )
 
 export const createPermissionThunk = createMutationThunk<CreatePermissionRequest>(

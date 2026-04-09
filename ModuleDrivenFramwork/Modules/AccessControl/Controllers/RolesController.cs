@@ -19,9 +19,10 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<RoleDto>>> GetAll()
+    public async Task<IActionResult> GetRoles([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(await _accessControl.GetRolesAsync());
+        var result = await _accessControl.GetRolesAsync(pageNumber, pageSize);
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}")]

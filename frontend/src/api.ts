@@ -4,6 +4,7 @@ import type {
   CreateUserRequest,
   LoginRequest,
   LoginResponse,
+  PaginatedResult,
   PermissionDto,
   RegisterRequest,
   RoleDto,
@@ -49,7 +50,8 @@ function buildHeaders(accessToken?: string) {
 }
 
 async function requestJson<T>(baseUrl: string, path: string, options: RequestOptions = {}) {
-  const response = await fetch(`${normalizeBaseUrl(baseUrl)}${path}`, {
+  const url = `${normalizeBaseUrl(baseUrl)}${path}`
+  const response = await fetch(url, {
     method: options.method ?? 'GET',
     headers: buildHeaders(options.accessToken),
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
@@ -127,9 +129,15 @@ export const authApi = {
   },
 }
 
+export const publicApi = {
+  getRoles(baseUrl: string) {
+    return requestJson<{ id: string; name: string; description: string }[]>(baseUrl, '/api/public/roles')
+  }
+}
+
 export const managementApi = {
-  listUsers(baseUrl: string, accessToken?: string) {
-    return requestJson<UserDto[]>(baseUrl, '/api/users', { accessToken })
+  listUsers(baseUrl: string, page = 1, pageSize = 10, accessToken?: string) {
+    return requestJson<PaginatedResult<UserDto>>(baseUrl, `/api/users?pageNumber=${page}&pageSize=${pageSize}`, { accessToken })
   },
   createUser(baseUrl: string, body: CreateUserRequest, accessToken?: string) {
     return requestJson<UserDto>(baseUrl, '/api/users', { method: 'POST', body, accessToken })
@@ -144,8 +152,8 @@ export const managementApi = {
   deleteUser(baseUrl: string, id: string, accessToken?: string) {
     return requestJson<void>(baseUrl, `/api/users/${id}`, { method: 'DELETE', accessToken })
   },
-  listRoles(baseUrl: string, accessToken?: string) {
-    return requestJson<RoleDto[]>(baseUrl, '/api/roles', { accessToken })
+  listRoles(baseUrl: string, page = 1, pageSize = 10, accessToken?: string) {
+    return requestJson<PaginatedResult<RoleDto>>(baseUrl, `/api/roles?pageNumber=${page}&pageSize=${pageSize}`, { accessToken })
   },
   createRole(baseUrl: string, body: CreateRoleRequest, accessToken?: string) {
     return requestJson<RoleDto>(baseUrl, '/api/roles', { method: 'POST', body, accessToken })
@@ -160,8 +168,8 @@ export const managementApi = {
   deleteRole(baseUrl: string, id: string, accessToken?: string) {
     return requestJson<void>(baseUrl, `/api/roles/${id}`, { method: 'DELETE', accessToken })
   },
-  listPermissions(baseUrl: string, accessToken?: string) {
-    return requestJson<PermissionDto[]>(baseUrl, '/api/permissions', { accessToken })
+  listPermissions(baseUrl: string, page = 1, pageSize = 10, accessToken?: string) {
+    return requestJson<PaginatedResult<PermissionDto>>(baseUrl, `/api/permissions?pageNumber=${page}&pageSize=${pageSize}`, { accessToken })
   },
   createPermission(baseUrl: string, body: CreatePermissionRequest, accessToken?: string) {
     return requestJson<PermissionDto>(baseUrl, '/api/permissions', {

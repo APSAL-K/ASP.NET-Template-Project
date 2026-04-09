@@ -1,3 +1,4 @@
+using ModuleDrivenFramwork.Common.Models;
 using ModuleDrivenFramwork.Modules.AccessControl.Application.DTOs;
 
 namespace ModuleDrivenFramwork.Modules.AccessControl.Services;
@@ -8,14 +9,14 @@ public interface IAccessControlService
     Task<SecurityContextDto> GetSecurityContextAsync(IEnumerable<Guid> roleIds);
 
     // Roles
-    Task<IReadOnlyList<RoleDto>> GetRolesAsync();
+    Task<PaginatedResult<RoleDto>> GetRolesAsync(int pageNumber, int pageSize);
     Task<RoleDto?> GetRoleAsync(Guid roleId);
     Task<RoleDto> CreateRoleAsync(CreateRoleRequestDto request);
     Task<RoleDto> UpdateRoleAsync(Guid roleId, UpdateRoleRequestDto request);
     Task<DeleteResult> DeleteRoleAsync(Guid roleId);
 
     // Permissions
-    Task<IReadOnlyList<PermissionDto>> GetPermissionsAsync();
+    Task<PaginatedResult<PermissionDto>> GetPermissionsAsync(int pageNumber, int pageSize);
     Task<PermissionDto?> GetPermissionAsync(Guid permissionId);
     Task<PermissionDto> CreatePermissionAsync(CreatePermissionRequestDto request);
     Task<PermissionDto> UpdatePermissionAsync(Guid permissionId, UpdatePermissionRequestDto request);

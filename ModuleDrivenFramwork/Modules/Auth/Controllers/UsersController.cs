@@ -18,9 +18,10 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<UserDto>>> GetAll()
+    public async Task<IActionResult> GetUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        return Ok(await _authManagementService.GetUsersAsync());
+        var result = await _authManagementService.GetUsersAsync(pageNumber, pageSize);
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
